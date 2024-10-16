@@ -38,11 +38,10 @@ return (
       <h1 id="todo">Todo List</h1>
       <InputField addItem={addItem} />
       <br />
-      {todoList.map((todo, index) => {
+      {todoList.map((todo) => {
         return (
           <>
             <ListItem
-              key={index}
               title={todo}
               deleteItem={() => deleteItem(todo)} 
             />
