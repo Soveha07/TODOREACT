@@ -43,6 +43,7 @@ return (
           <>
             <ListItem
               key={index}
+              index={index+1}
               title={todo}
               deleteItem={() => deleteItem(todo)} 
             />
