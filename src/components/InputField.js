@@ -1,6 +1,5 @@
-import React, { useContext, useState } from "react";
-import { ThemeContext } from "../App";
-import './inputField.module.css'
+import React, { useState } from "react";
+import './inputField.module.css';
 
 const InputField = ({addItem}) => {
   const [todoInput, setTodoInput] = useState("");

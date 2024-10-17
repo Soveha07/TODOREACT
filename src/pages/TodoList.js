@@ -1,8 +1,8 @@
 import React from "react";
-import InputField from "./components/InputField";
-import useLocalStorageState from "./hooks/useLocalStorageState";
-import SearchBar from "./components/SearchBar";
-import ListItem from "./components/ListItem";
+import InputField from "../components/InputField";
+import useLocalStorageState from "../hooks/useLocalStorageState";
+import SearchBar from "../components/SearchBar";
+import ListItem from "../components/ListItem";
 
 function TodoList() {
   const [todoList, setTodoList] = useLocalStorageState("listItem");

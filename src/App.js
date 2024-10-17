@@ -1,6 +1,6 @@
 import { useState, createContext } from "react";
 import './App.css';
-import TodoList from "./TodoList";
+import TodoList from "./pages/TodoList";
 
 export const ThemeContext = createContext('dark')
 
