@@ -1,6 +1,9 @@
-import { useReducer } from "react";
+import {
+  useReducer
+} from "react";
 import DigitButton from "../components/DigitButton";
 import OperationButton from "../components/OperationButton";
+import CalculatorHistory from "./CalculatorHistory";
 
 export const ACTIONS = {
   ADD_DIGIT: "add-digit",
@@ -13,46 +16,92 @@ export const ACTIONS = {
 function reducer(state, { type, payload }) {
   switch (type) {
     case ACTIONS.ADD_DIGIT:
-      if (payload.digit === "0" && state.currentOperand === "0") {
-        return state;
+      if (IsComplete(state)) {
+        alert("Calculation Completed! Press AC for new calculation");
+      } else {
+        if (payload.digit === "0" && state.currentOperand === "0") {
+          return state;
+        }
+        if (payload.digit === "." && state.currentOperand.includes(".")) {
+          return state;
+        }
+        return {
+          ...state,
+          currentOperand: `${state.currentOperand || ""}${payload.digit}`,
+        };
       }
-      if (payload.digit === "." && state.currentOperand.includes(".")) {
-        return state;
-      }
-      return {
-        ...state,
-        currentOperand: `${state.currentOperand || ""}${payload.digit}`,
-      };
+      return state;
     case ACTIONS.CLEAR:
       return {};
 
     case ACTIONS.CHOOSE_OPERATION:
-      if (state.currentOperand == null && state.previousOperand == null) {
-        return state;
-      }
+      if (IsComplete(state)) {
+        alert("Calculation Completed! Press AC for new calculation");
+      } else {
+        if (state.currentOperand == null && state.previousOperand == null) {
+          return state;
+        }
 
-      if (state.currentOperand == null) {
+        if (state.currentOperand == null) {
+          return {
+            ...state,
+            operation: payload.operation,
+          };
+        }
+
+        if (state.previousOperand == null) {
+          return {
+            ...state,
+            operation: payload.operation,
+            previousOperand: state.currentOperand,
+            currentOperand: null,
+          };
+        }
         return {
           ...state,
+          previousOperand: evaluate(state),
           operation: payload.operation,
-        };
-      }
-
-      if (state.previousOperand == null) {
-        return {
-          ...state,
-          operation: payload.operation,
-          previousOperand: state.currentOperand,
           currentOperand: null,
         };
       }
-
-      return {
-        ...state,
-        previousOperand: evaluate(state),
-        operation: payload.operation,
-        currentOperand: null,
-      };
+      return state;
+    case ACTIONS.DELETE_DIGIT:
+      if (IsComplete(state)) {
+        alert("Calculation Completed! Press AC for new calculation");
+      } else {
+        if (state.currentOperand != null) {
+          if (state.currentOperand.length == 1) {
+            return {
+              ...state,
+              currentOperand: null,
+            };
+          } else {
+            return {
+              ...state,
+              currentOperand: state.currentOperand.slice(0, -1),
+            };
+          }
+        } else {
+          return {
+            ...state,
+            currentOperand: null,
+          };
+        }
+      }
+      return state;
+    case ACTIONS.EVALUATE:
+      if (IsComplete(state) && state.alertStatus !== true) {
+        alert("Calculation Completed! Press AC for new calculation");
+      } else {
+        return {
+          ...state,
+          secondNum: state.currentOperand,
+          currentOperand: evaluate(state),
+          result: `${state.previousOperand} ${state.operation} ${
+            state.currentOperand
+          } = ${evaluate(state)}`,
+        };
+      }
   }
 }
 
@@ -77,43 +126,60 @@ function evaluate({ currentOperand, previousOperand, operation }) {
       computation = prev / current;
       break;
   }
-
   return computation.toString();
 }
 
-function Calculator() {
-  const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(
-    reducer,
-    {}
+function IsComplete(state) {
+  return (
+    state.previousOperand &&
+    state.currentOperand &&
+    state.operation &&
+    state.secondNum
   );
+}
+
+function Calculator() {
+  const [
+    { currentOperand, previousOperand, secondNum, operation, result },
+    dispatch,
+  ] = useReducer(reducer, {});
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{ height: "100vh" }}
-    >
-      <div className="container-fluid h-75 w-25">
-        <div className="row d-flex flex-column">
-          <div className="col-12 bg-dark d-flex justify-content-end align-items-end rounded-top pr-5">
-            <p className="text-white">
-              {previousOperand} {operation}
+    <div className="d-flex justify-content-around mt-5">
+      <div className="h-75 w-25">
+        <div className="row d-flex flex-column" style={{ height: "150px" }}>
+          <div
+            className="col-12 bg-dark d-flex justify-content-end align-items-end rounded-top pr-5"
+            style={{ flex: "1 1 0" }}
+          >
+            <p className="text-white m-0">
+              {previousOperand} {operation} {secondNum}
             </p>
           </div>
-          <div className="col-12 bg-dark d-flex justify-content-end align-items-end p-4">
-            <h4 className="text-white">{currentOperand}</h4>
+          <div
+            className="col-12 bg-dark d-flex justify-content-end align-items-end p-4"
+            style={{ flex: "1 1 0" }}
+          >
+            <h2 className="text-white m-0">{currentOperand}</h2>
           </div>
         </div>
+
         <div className="row" style={{ height: "80px" }}>
           <div className="col-5 bg-secondary text-white d-flex justify-content-center align-items-center border border-light">
             <button
-              className="btn btn-outline-light"
+              className="btn btn-outline-light w-75"
               onClick={() => dispatch({ type: ACTIONS.CLEAR })}
             >
               AC
             </button>
           </div>
           <div className="col-4 bg-secondary text-white d-flex justify-content-center align-items-center border border-light">
-            <button className="btn btn-outline-light">DEL</button>
+            <button
+              className="btn btn-outline-light w-75"
+              onClick={() => dispatch({ type: ACTIONS.DELETE_DIGIT })}
+            >
+              DEL
+            </button>
           </div>
           <div className="col-3 bg-secondary text-white d-flex justify-content-center align-items-center border border-light">
             <OperationButton
@@ -124,11 +190,7 @@ function Calculator() {
         </div>
         <div className="row" style={{ height: "80px" }}>
           <div className="col-3 bg-secondary text-white d-flex justify-content-center align-items-center border border-">
-            <DigitButton
-              digit={1}
-              className="btn btn-outline-light"
-              dispatch={dispatch}
-            ></DigitButton>
+            <DigitButton digit={1} dispatch={dispatch}></DigitButton>
           </div>
           <div className="col-3 bg-secondary text-white d-flex justify-content-center align-items-center border border-light">
             <DigitButton digit={2} dispatch={dispatch}></DigitButton>
@@ -185,9 +247,17 @@ function Calculator() {
             <DigitButton digit={0} dispatch={dispatch}></DigitButton>
           </div>
           <div className="col-6 bg-secondary text-white d-flex justify-content-center align-items-center border border-light rounded-bottom">
-            <button className="btn btn-outline-light">=</button>
+            <button
+              className="btn btn-outline-light w-75"
+              onClick={() => dispatch({ type: ACTIONS.EVALUATE })}
+            >
+              =
+            </button>
           </div>
         </div>
+      </div>
+      <div className="mt-3">
+        <CalculatorHistory result={result} />
       </div>
     </div>
   );

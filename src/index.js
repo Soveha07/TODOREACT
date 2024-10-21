@@ -6,24 +6,27 @@ import reportWebVitals from "./reportWebVitals";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Calculator from "./pages/Calculator";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CalculatorHistory from "./pages/CalculatorHistory";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    errorElement: <h1>Error 404 Not Found</h1>,
+    errorElement: <h1>Error 404 Not Found</h1>
   },
   {
     path: "/Calculator",
-    element: <Calculator />,
+    element: <Calculator />
   },
+  {
+    path: "/Calculator/History",
+    element: <CalculatorHistory />
+  }
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
     <RouterProvider router={router} />
-  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

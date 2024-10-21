@@ -4,7 +4,7 @@ export default function OperationButton ( { dispatch, operation} ) {
     return (
         <button
          onClick={ () => dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: {operation} })}
-         className="btn btn-outline-light"
+         className="btn btn-outline-light w-100"
         >
             { operation } 
         </button>
